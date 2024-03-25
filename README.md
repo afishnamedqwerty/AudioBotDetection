@@ -37,12 +37,12 @@ Replace "path_to_your_audio_file.wav" with the path to your audio file.
 ## Project Structure
 audio_analysis_project/
 │
-├── preprocessing.py       # Noise reduction and initial audio preparation
-├── diarization.py         # Speaker diarization
-├── vad.py                 # Voice activity detection
-├── feature_extraction.py  # Audio feature extraction
-├── model.py               # Machine learning model for classification
-└── main.py                # Main script orchestrating the analysis pipeline
+├── preprocessing.py       |# Noise reduction and initial audio preparation|
+├── diarization.py         |# Speaker diarization|
+├── vad.py                 |# Voice activity detection|
+├── feature_extraction.py  |# Audio feature extraction|
+├── model.py               |# Machine learning model for classification|
+└── main.py                |# Main script orchestrating the analysis pipeline|
 
 ## License
 
