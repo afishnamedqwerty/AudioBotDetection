@@ -6,12 +6,10 @@ This project aims to detect bot-generated audio in multi-speaker recordings from
 
 ## Components
 
-- Preprocessing.py: Noise reduction and initial audio preparation.
-- Diarization.py: Separation of audio into individual speaker segments.
-- VAD.py: Identification of speech segments within the audio.
-- Feature_Extraction.py: Extraction of audio features relevant for distinguishing human from bot-generated speech.
-- Model.py: A machine learning model trained to classify audio as either human or bot-generated.
-- Main.py: The main script orchestrating the analysis pipeline.
+- feature_selection.py: Extraction of audio features relevant for distinguishing human from bot-generated speech.
+- model.py: A machine learning model trained to classify audio as either human or bot-generated.
+- main.py: The main script orchestrating the analysis pipeline.
+- utils.py: Noise reduction, audio diarization in test data, VAD, and additional audio utils.
 
 ## Preqrequisites
 
@@ -28,25 +26,25 @@ For pyAudioAnalysis, you may need to follow additional installation instructions
 
 ## Usage
 
-To run the audio bot detection pipeline, navigate to the project directory and execute:
+To train the model:
 
-`python main.py --audio_file "path_to_your_audio_file.wav"`
-
-Replace "path_to_your_audio_file.wav" with the path to your audio file.
+`python main.py"`
 
 ## Project Structure
+An LSTM model trained on GigaSpeech dataset; fit to audio-sampling features such as cepstral coefficients, chroma stft, pitch, and jitter to perform binary classification between human and AI-generative audio sampling. 
+
 audio_analysis_project/
 │
-├── preprocessing.py       |# Noise reduction and initial audio preparation|
-├── diarization.py         |# Speaker diarization|
-├── vad.py                 |# Voice activity detection|
-├── feature_extraction.py  |# Audio feature extraction|
-├── model.py               |# Machine learning model for classification|
-└── main.py                |# Main script orchestrating the analysis pipeline|
+├── preprocessing.py       # Noise reduction and initial audio preparation
+├── diarization.py         # Speaker diarization
+├── vad.py                 # Voice activity detection
+├── feature_extraction.py  # Audio feature extraction
+├── model.py               # Machine learning model for classification
+└── main.py                # Main script orchestrating the analysis pipeline
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE.md file for details.
+This project is licensed under the BOTperative Corp (subsidiary of Tyrell Corporation) - see the LICENSE.md for details.
 
 ## Acknowledgements
 
