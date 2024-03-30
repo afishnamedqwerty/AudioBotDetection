@@ -1,3 +1,5 @@
+model.py
+
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
@@ -12,10 +14,17 @@ from tensorflow.keras.layers import Dense, LSTM, Dropout
 
 def build_model(input_shape, num_classes=2):
     """
-    Build an LSTM model suitable for processing time-series features.
+    Build an LSTM model suitable for processing time-series features extracted from the audio data.
+    
+    Parameters:
+    - input_shape: Tuple representing the shape of the input data.
+    - num_classes: Number of output classes. Default is 2 for binary classification.
+    
+    Returns:
+    - Compiled Keras Sequential model.
     """
     model = Sequential([
-        LSTM(64, input_shape=input_shape, return_sequences=True),
+        LSTM(64, input_shape=(input_shape[1], input_shape[2]), return_sequences=True),
         Dropout(0.5),
         LSTM(32),
         Dropout(0.5),
@@ -27,16 +36,53 @@ def build_model(input_shape, num_classes=2):
     return model
 
 def train_model(X_train, y_train, X_val, y_val, epochs=10, batch_size=32):
-    model = build_model((X_train.shape[1], X_train.shape[2], 1))
+    """
+    Trains the LSTM model on the training data and evaluates it on the validation data.
+    
+    Parameters:
+    - X_train: Training data features.
+    - y_train: Training data labels.
+    - X_val: Validation data features.
+    - y_val: Validation data labels.
+    - epochs: Number of epochs to train for.
+    - batch_size: Size of the batches to use when training.
+    
+    Returns:
+    - model: The trained Keras model.
+    - history: Training history object containing training and validation loss and accuracy for each epoch.
+    """
+    # Adjust the input shape for the model based on training data
+    input_shape = (X_train.shape[1], X_train.shape[2])
+    model = build_model(input_shape)
+    
+    # Train the model
     history = model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs, batch_size=batch_size)
     return model, history
 
 def predict(model, X):
+    """
+    Predicts the class labels for the given data using the trained model.
+    
+    Parameters:
+    - model: The trained model.
+    - X: The data to predict on.
+    
+    Returns:
+    - predicted_class: The predicted class labels.
+    """
     predictions = model.predict(X)
     predicted_class = np.argmax(predictions, axis=1)
     return predicted_class
 
 def evaluate_model(model, X_test, y_test):
+    """
+    Evaluates the model on the test data and prints the loss and accuracy.
+    
+    Parameters:
+    - model: The trained model.
+    - X_test: Test data features.
+    - y_test: Test data labels.
+    """
     loss, accuracy = model.evaluate(X_test, y_test)
     print(f'Test Loss: {loss}, Test Accuracy: {accuracy}')
 
