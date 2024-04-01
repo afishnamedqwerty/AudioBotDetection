@@ -4,13 +4,18 @@ import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LSTM, Dropout
 from sklearn.model_selection import train_test_split
-from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, LSTM, Dropout
+from tensorflow.keras.optimizers import Adam
 
 '''Given the updated feature selections and considering the inclusion of PCA, the input to your model
     will now be a flattened vector of the selected features rather than raw audio data or spectrograms.
     This adjustment means you might not need the initial `Convo2D` layer designed for image-like input 
     (ex. spectrograms).'''
+
+'''Next Steps:
+
+    Implement and test the revised model architecture with the selected and processed features from the dataset.
+    Conduct hyperparameter tuning sessions to find the optimal configuration for the model based on training and validation performance.
+    Assess model performance thoroughly on a separate test set to ensure it generalizes well to unseen data.'''
 
 def build_model(input_shape, num_classes=2):
     """
@@ -24,15 +29,16 @@ def build_model(input_shape, num_classes=2):
     - Compiled Keras Sequential model.
     """
     model = Sequential([
-        LSTM(64, input_shape=(input_shape[1], input_shape[2]), return_sequences=True),
-        Dropout(0.5),
-        LSTM(32),
-        Dropout(0.5),
-        Dense(64, activation='relu'),
-        Dense(num_classes, activation='softmax')
+        LSTM(128, input_shape=input_shape, return_sequences=True),
+        Dropout(0.3),
+        LSTM(64, return_sequences=False),
+        Dropout(0.3),
+        Dense(32, activation='relu'),
+        Dense(num_classes, activation='sigmoid') # Changed to Sigmoid for binary classification
     ])
     # Compile the model with Adam optimizer and cross-entropy loss
-    model.compile(optimizer='adam', loss='sparse_categorical_crossentropy', metrics=['accuracy'])
+    optimizer = Adam(learning_rate=0.001)
+    model.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
     return model
 
 def train_model(X_train, y_train, X_val, y_val, epochs=10, batch_size=32):

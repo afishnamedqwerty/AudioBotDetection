@@ -1,13 +1,27 @@
+feature_selection.py
+
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 from datasets import load_dataset
 import librosa
+from concurrent.futures import ProcessPoolExecutor
 
+'''Next Steps:
+
+    Test the revised code to ensure functionality and performance improvements.
+    Evaluate the impact of added features and dimensionality reduction adjustments 
+    on model performance.
+    Consider further scalability and optimization based on model testing and 
+    validation results.
+
+Note: Implementation details, such as error handling and dataset balancing, 
+require a deeper understanding of the dataset structure and are critical for 
+further revisions.'''
 
 # Extract Mel-frequency cepstrum coefficients from audio
-def extract_cepstral_coefficients(audio, sr=16000, n_mfcc=20, lifter=0):
+def extract_mfccs(audio, sr=16000, n_mfcc=20, lifter=0):
     """
     Extracts Mel-frequency cepstral coefficients (MFCCs) from an audio signal.
     
@@ -26,6 +40,19 @@ def extract_cepstral_coefficients(audio, sr=16000, n_mfcc=20, lifter=0):
 
 # Extract Chroma STFT features from audio
 def extract_chroma_stft(audio, sr=16000):
+    """
+    Extracts Short-Time Fourier Transform (STFT) from an audio signal.
+    
+    Parameters:
+    - audio: The audio signal from which to extract features.
+    - sr: The sample rate of the audio signal.
+    - n_mfcc: The number of MFCCs to extract.
+    - lifter: The liftering coefficient to apply. Liftering can help emphasize higher-order coefficients.
+              Set to 0 to disable liftering.
+    
+    Returns:
+    - An array of STFTs averaged across time.
+    """
     stft = librosa.feature.chroma_stft(y=audio, sr=sr)
     return np.mean(stft.T,axis=0)
 
@@ -41,6 +68,22 @@ def extract_jitter(audio, sr=16000):
     jitter = np.abs(np.diff(pitches[pitches > 0])).mean()
     return np.array([jitter if not np.isnan(jitter) else 0])
 
+# Extract Harmonic-to-Noise Ratio (HNR)
+def extract_hnr(audio, sr=16000):
+    """
+    Extracts the Harmonic-to-Noise Ratio (HNR) from an audio signal.
+    
+    Parameters:
+    - audio: The audio signal from which to extract HNR.
+    - sr: The sample rate of the audio signal.
+    
+    Returns:
+    - An array with the calculated HNR value.
+    """
+    harmonic, percussive = librosa.effects.hpss(audio)
+    hnr = np.mean(librosa.effects.harmonic(audio))
+    return np.array([hnr if not np.isnan(hnr) else 0])
+
 # Load GigaSpeech dataset subset
 def load_gigaspeech_dataset(subset='xs', use_auth_token=True):
     """
@@ -49,8 +92,33 @@ def load_gigaspeech_dataset(subset='xs', use_auth_token=True):
     gs = load_dataset("speechcolab/gigaspeech", subset, use_auth_token=use_auth_token)
     return gs
 
-# Extract selected features from the dataset
+# Modified extract_features function to utilize parallel processing
 def extract_features(gs, feature_funcs):
+    """
+    Extract features from the GigaSpeech dataset using parallel processing.
+    
+    Parameters:
+    - gs: The GigaSpeech dataset.
+    - feature_funcs: A dictionary of functions to apply for feature extraction.
+    
+    Returns:
+    - An array of extracted features from the dataset.
+    """
+    features = []
+    
+    def process_audio(audio_input):
+        return np.hstack([func(audio_input) for func in feature_funcs.values()])
+    
+    with ProcessPoolExecutor() as executor:
+        futures = [executor.submit(process_audio, gs["train"][i]["audio"]["array"]) for i in range(len(gs["train"]))]
+        for future in futures:
+            features.append(future.result())
+    
+    return np.array(features)
+
+
+# Extract selected features from the dataset - Deprecated
+'''def extract_features(gs, feature_funcs):
     """
     Extract features from the GigaSpeech dataset.
 
@@ -66,7 +134,7 @@ def extract_features(gs, feature_funcs):
         audio_input = gs["train"][i]["audio"]["array"]
         feature_row = np.hstack([func(audio_input) for func in feature_funcs.values()])
         features.append(feature_row)
-    return np.array(features)
+    return np.array(features)'''
 
 # Perform PCA to reduce the dimensionality of the feature set
 def perform_pca(X, n_components=0.95):
