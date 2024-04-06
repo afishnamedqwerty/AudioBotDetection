@@ -2,53 +2,77 @@
 
 ## Overview
 
-This project aims to detect bot-generated audio in multi-speaker recordings from platforms such as Twitter Spaces. Utilizing advanced audio processing and machine learning techniques, the project identifies characteristics unique to synthetic voices, distinguishing them from human speakers.
+This project aims to detect bot-generated audio in multi-speaker recordings from platforms such as Twitter Spaces. Utilizing advanced audio processing and machine learning techniques, the project focuses on extracting Linear Frequency Cepstral Coefficients (LFCC) from audio files and utilizing Gaussian Mixture Models (GMM) for the classification of real vs synthetic speech. The primary goal is to preprocess audio data, extract meaningful features, and apply machine learning models to distinguish between real and synthesized speech samples.
+
+## Features
+
+- **Dataset Downloading and Extraction**: Automated scripts to download and extract speech datasets from specified URLs.
+- **Feature Extraction**: Computation of Mel Filterbanks and LFCC from audio signals.
+- **Model Training and Evaluation**: Training of GMMs for real and synthetic voice samples and evaluation using the Equal Error Rate (EER) metric.
+- **Visualization**: Visualizations of LFCC distributions and coefficients to analyze feature characteristics.
 
 ## Components
 
-- feature_selection.py: Extraction of audio features relevant for distinguishing human from bot-generated speech.
-- model.py: A machine learning model trained to classify audio as either human or bot-generated.
-- main.py: The main script orchestrating the analysis pipeline.
-- utils.py: Noise reduction, audio diarization in test data, VAD, and additional audio utils.
+- `run.ipynb`: Dataset preprocessing, feature selection, model training & evaluation
+- `batch_synthetic.py`: Generates a synthetic waveform dataest of audio files from the LJSPEECH dataset transcripts using the TACOTRON WAVERNN LJSPEECH pipeline.
+- `test.ipynb`: CUDA munitions
 
 ## Preqrequisites
 
 - Python 3.6 or higher
-- Libraries: librosa, noisereduce, pyAudioAnalysis, webrtcvad, tensorflow, scikit-learn
-
-## Installation
-
-First, ensure that you have Python installed on your system. Then, install the required libraries using pip:
-
-`pip install librosa noisereduce pyAudioAnalysis webrtcvad tensorflow scikit-learn`
-
-For pyAudioAnalysis, you may need to follow additional installation instructions from its GitHub repository.
+- Pytorch 1.8.1 or higher
+- torchaudio 0.8.1 or higher
+- TensorFlow (for comparisons)
+- Additional Libraries: 
+- `os`
+- `requests`
+- `tqdm`
+- `pathlib`
+- `tarfile`
+- `numpy`
+- `librosa`
+- `scipy`
+- `scikit-learn`
+- `matplotlib`
+- `seaborn`
+- `soundfile`
 
 ## Usage
 
 To train the model:
 
-`python main.py"`
+Use `run.ipynb` to download LJSPEECH dataset, run batch_synthetic.py to generate second synthetic dataset, contineu through `run.ipynb` for feature selection, model training, and evaluation.
 
-## Project Structure
-An LSTM model trained on GigaSpeech dataset; fit to audio-sampling features such as cepstral coefficients, chroma stft, pitch, and jitter to perform binary classification between human and AI-generative audio sampling. 
+## Audio Quality and Customization Options
 
-audio_analysis_project/
-│
-├── preprocessing.py       # Noise reduction and initial audio preparation
-├── diarization.py         # Speaker diarization
-├── vad.py                 # Voice activity detection
-├── feature_extraction.py  # Audio feature extraction
-├── model.py               # Machine learning model for classification
-└── main.py                # Main script orchestrating the analysis pipeline
+### Sigma Tuning
 
-## License
+The sigma parameter in WaveGlow inference controls the variance of the Gaussian distribution used for the audio data. Keep in mind this current project is configured for WAVERNN instead of Wave2Vec, which is required for sigma value. Adjusting sigma affects the audio quality:
+- A lower sigma value leads to clearer audio with potential unnatural artifacts.
+- A higher sigma value produces more natural audio with possible background noise.
 
-This project is licensed under the BOTperative Corp (subsidiary of Tyrell Corporation) - see the LICENSE.md for details.
+### Model Selection
 
-## Acknowledgements
+You can choose between character-based and phoneme-based processing for text input. Phoneme-based processing tends to produce more natural-sounding speech.
 
-- `librosa` for audio processing
-- `pyAudioAnalysis` for speaker diarization support
-- `webrtcvad` for voice activity detection
-- `tensorflow` and `scikit-learn` for building and training the machine learning model
+## Example
+
+# Define your dataset URL and extraction directory
+dataset_url = "https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2"
+extract_to = "./ljs_dataset"
+
+# Download and extract dataset
+download_and_extract_dataset(dataset_url, extract_to)
+
+# Load and preprocess audio files, then extract features
+real_audio_dir = "./ljs_dataset/LJSpeech-1.1/wavs"
+real_features = preprocess_and_extract_features([real_audio_dir])
+
+synthetic_audio_dir = "./synthetic_ljs"
+synthetic_features = preprocess_and_extract_features([synthetic_audio_dir])
+
+# Train GMM models for real and synthetic voices (assuming synthetic features are obtained similarly)
+real_gmm, synthetic_gmm = train_gmm_models(real_features, synthetic_features)
+
+# Evaluate models and compute EER
+EER, eer_threshold = evaluate_gmm(real_gmm, synthetic_gmm, test_features, true_labels)
