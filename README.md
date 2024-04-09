@@ -70,10 +70,10 @@ download_and_extract_dataset(dataset_url, extract_to)
 
 # Load and preprocess audio files, then extract features
 real_audio_dir = "./ljs_dataset/LJSpeech-1.1/wavs"
-real_features = preprocess_and_extract_features([real_audio_dir])
+real_features = extract_features([real_audio_dir])
 
 synthetic_audio_dir = "./synthetic_ljs"
-synthetic_features = preprocess_and_extract_features([synthetic_audio_dir])
+synthetic_features = extract_features([synthetic_audio_dir])
 
 # Train GMM models for real and synthetic voices (assuming synthetic features are obtained similarly)
 real_gmm, synthetic_gmm = train_gmm_models(real_features, synthetic_features)
@@ -81,7 +81,5 @@ real_gmm, synthetic_gmm = train_gmm_models(real_features, synthetic_features)
 # Evaluate models and compute EER
 EER, eer_threshold = evaluate_gmm(real_gmm, synthetic_gmm, test_features, true_labels)
 
-
-SMA's
 
 
