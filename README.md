@@ -26,7 +26,6 @@ Officially tested on CUDA 11.8.1 w/ cuDNN 8.9.1
 - Python 3.6 or higher (tested on 3.11.8)
 - Pytorch 1.8.1 or higher (tested on 2.2.2)
 - torchaudio 0.8.1 or higher (tested on 2.2.2)
-- TensorFlow (for comparisons)
 - Additional Libraries: 
 - `os`
 - `requests`
