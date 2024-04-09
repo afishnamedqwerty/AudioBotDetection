@@ -75,7 +75,7 @@ real_features = extract_features([real_audio_dir])
 synthetic_audio_dir = "./synthetic_ljs"
 synthetic_features = extract_features([synthetic_audio_dir])
 
-# Train GMM models for real and synthetic voices (assuming synthetic features are obtained similarly)
+# Train GMM models for real and synthetic voices
 real_gmm, synthetic_gmm = train_gmm_models(real_features, synthetic_features)
 
 # Evaluate models and compute EER
