@@ -17,7 +17,7 @@ This project aims to detect bot-generated audio in multi-speaker recordings from
 ## Components
 
 - `run.ipynb`: Dataset preprocessing, feature selection, model training & evaluation
-- `batch_synthetic.py`: Generates a synthetic waveform dataest of audio files from the LJSPEECH dataset transcripts using the TACOTRON WAVERNN LJSPEECH pipeline.
+- `batch_synthetic.py`: Generates a synthetic waveform dataest of audio files from LJSPEECH dataset transcripts using the TACOTRON WAVERNN pipeline.
 - `test.ipynb`: CUDA munitions
 
 ## Preqrequisites
@@ -44,7 +44,9 @@ Officially tested on CUDA 11.8.1 w/ cuDNN 8.9.1
 
 To train the model:
 
-Use `run.ipynb` to download LJSPEECH dataset, run batch_synthetic.py to generate second synthetic dataset, contineu through `run.ipynb` for feature selection, model training, and evaluation.
+- Use `run.ipynb` to download LJSPEECH dataset and build preliminary functions 
+- Run `batch_synthetic.py` to generate mirrored synthetic dataset to the LJSPEECH transcripts
+- Continue through `run.ipynb` for feature selection, model training, and evaluation.
 
 ## Audio Quality and Customization Options
 

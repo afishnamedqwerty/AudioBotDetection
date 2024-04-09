@@ -1,60 +1,27 @@
-feature_selection.py
-
-from sklearn.decomposition import PCA
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.preprocessing import StandardScaler
 import numpy as np
-from datasets import load_dataset
 import librosa
-from concurrent.futures import ProcessPoolExecutor
+from sklearn.preprocessing import StandardScaler
+from python_speech_features import logfbank  # Assuming use of python_speech_features for LFCC
 
-'''Next Steps:
-
-    Test the revised code to ensure functionality and performance improvements.
-    Evaluate the impact of added features and dimensionality reduction adjustments 
-    on model performance.
-    Consider further scalability and optimization based on model testing and 
-    validation results.
-
-Note: Implementation details, such as error handling and dataset balancing, 
-require a deeper understanding of the dataset structure and are critical for 
-further revisions.'''
-
-# Extract Mel-frequency cepstrum coefficients from audio
-def extract_mfccs(audio, sr=16000, n_mfcc=20, lifter=0):
+def extract_lfcc(audio, sr=16000, n_filters=26, n_lfcc=20):
     """
-    Extracts Mel-frequency cepstral coefficients (MFCCs) from an audio signal.
-    
+    Extracts Linear Frequency Cepstral Coefficients (LFCC) from an audio signal.
+
     Parameters:
     - audio: The audio signal from which to extract features.
     - sr: The sample rate of the audio signal.
-    - n_mfcc: The number of MFCCs to extract.
-    - lifter: The liftering coefficient to apply. Liftering can help emphasize higher-order coefficients.
-              Set to 0 to disable liftering.
-    
-    Returns:
-    - An array of MFCCs averaged across time.
-    """
-    mfccs = librosa.feature.mfcc(y=audio, sr=sr, n_mfcc=n_mfcc, lifter=lifter)
-    return np.mean(mfccs.T,axis=0)
+    - n_filters: The number of filters to use in the filterbank.
+    - n_lfcc: The number of LFCCs to extract.
 
-# Extract Chroma STFT features from audio
-def extract_chroma_stft(audio, sr=16000):
-    """
-    Extracts Short-Time Fourier Transform (STFT) from an audio signal.
-    
-    Parameters:
-    - audio: The audio signal from which to extract features.
-    - sr: The sample rate of the audio signal.
-    - n_mfcc: The number of MFCCs to extract.
-    - lifter: The liftering coefficient to apply. Liftering can help emphasize higher-order coefficients.
-              Set to 0 to disable liftering.
-    
     Returns:
-    - An array of STFTs averaged across time.
+    - lfcc_features: An array of LFCC features averaged across time.
     """
-    stft = librosa.feature.chroma_stft(y=audio, sr=sr)
-    return np.mean(stft.T,axis=0)
+    # Compute log filterbank energies.
+    logfbank_features = logfbank(audio, samplerate=sr, nfilt=n_filters)
+    
+    # Compute DCT to get LFCCs, keep first 'n_lfcc' coefficients
+    lfcc_features = np.fft.dct(logfbank_features, type=2, axis=1, norm='ortho')[:, :n_lfcc]
+    return np.mean(lfcc_features, axis=0)
 
 # Extract Pitch
 def extract_pitch(audio, sr=16000, fmin=75, fmax=300):
@@ -84,13 +51,34 @@ def extract_hnr(audio, sr=16000):
     hnr = np.mean(librosa.effects.harmonic(audio))
     return np.array([hnr if not np.isnan(hnr) else 0])
 
-# Load GigaSpeech dataset subset
-def load_gigaspeech_dataset(subset='xs', use_auth_token=True):
+def extract_features(audio_path, sr=16000):
     """
-    Load a specified subset of the GigaSpeech dataset.
+    Wrapper function to load an audio file, pre-process it, and extract relevant features.
+
+    Parameters:
+    - audio_path: Path to the audio file.
+    - sr: Sample rate to use for loading the audio.
+
+    Returns:
+    - features: A numpy array containing extracted features.
     """
-    gs = load_dataset("speechcolab/gigaspeech", subset, use_auth_token=use_auth_token)
-    return gs
+    audio, sr = librosa.load(audio_path, sr=sr)
+    lfcc = extract_lfcc(audio, sr)
+    return lfcc
+
+def scale_features(features):
+    """
+    Scales the features using StandardScaler.
+
+    Parameters:
+    - features: Numpy array of features to scale.
+
+    Returns:
+    - scaled_features: Scaled features.
+    """
+    scaler = StandardScaler()
+    scaled_features = scaler.fit_transform(features.reshape(-1, 1))
+    return scaled_features.flatten()
 
 # Modified extract_features function to utilize parallel processing
 def extract_features(gs, feature_funcs):

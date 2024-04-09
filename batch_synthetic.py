@@ -1,14 +1,17 @@
 import os
 import torch
 import torchaudio
-import tensorflow as tf
+#import tensorflow as tf
 import numpy as np
 import pandas as pd
 import soundfile as sf
 from scipy.io.wavfile import write
 from tqdm import tqdm
 
-'''Tuning Sigma in WaveGlow Inference
+'''Synthetic dataset is trained using the TACOTRON WAVERNN LJSPEECH pipeline'''
+
+
+'''Tuning Sigma in WaveGlow Inference - an alternative to WAVERNN
 
 The sigma parameter in the WaveGlow model inference call controls the variance 
 of the Gaussian distribution used to model the audio data. Adjusting sigma can 
