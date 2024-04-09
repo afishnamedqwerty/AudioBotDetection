@@ -2,6 +2,9 @@
 
 ## Overview
 
+!!! I need to clean this up, only relevant files are your respective dataset folder locations and the following components listed below.
+
+
 This project aims to detect bot-generated audio in multi-speaker recordings from platforms such as Twitter Spaces. Utilizing advanced audio processing and machine learning techniques, the project focuses on extracting Linear Frequency Cepstral Coefficients (LFCC) from audio files and utilizing Gaussian Mixture Models (GMM) for the classification of real vs synthetic speech. The primary goal is to preprocess audio data, extract meaningful features, and apply machine learning models to distinguish between real and synthesized speech samples.
 
 ## Features
@@ -19,9 +22,10 @@ This project aims to detect bot-generated audio in multi-speaker recordings from
 
 ## Preqrequisites
 
-- Python 3.6 or higher
-- Pytorch 1.8.1 or higher
-- torchaudio 0.8.1 or higher
+Officially tested on CUDA 11.8.1 w/ cuDNN 8.9.1
+- Python 3.6 or higher (tested on 3.11.8)
+- Pytorch 1.8.1 or higher (tested on 2.2.2)
+- torchaudio 0.8.1 or higher (tested on 2.2.2)
 - TensorFlow (for comparisons)
 - Additional Libraries: 
 - `os`
@@ -76,3 +80,8 @@ real_gmm, synthetic_gmm = train_gmm_models(real_features, synthetic_features)
 
 # Evaluate models and compute EER
 EER, eer_threshold = evaluate_gmm(real_gmm, synthetic_gmm, test_features, true_labels)
+
+
+SMA's
+
+
